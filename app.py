@@ -1,15 +1,14 @@
 import streamlit as st
 import json
 import os
-from mistralai import Mistral
+import requests
 
 # Configurazione della pagina
 st.set_page_config(page_title="Svuota Frigo Smart", page_icon="🥗")
 
-# Legge la chiave API dalle variabili d'ambiente di Render
-API_KEY = os.environ.get("yTvmRtdl6rPPRHfFD412ECb7Vaf04C8a")
+# Recupera la chiave API dalle variabili d'ambiente di Render
+API_KEY = os.environ.get("MISTRAL_API_KEY")
 
-# Interfaccia Utente (Nessun riferimento all'IA)
 st.title("🥗 Svuota Frigo Smart")
 st.write("Inserisci gli ingredienti disponibili nella tua dispensa per trovare le ricette più adatte.")
 
@@ -22,12 +21,17 @@ if st.button("Cerca Ricette"):
     if not ingredienti_input:
         st.warning("Inserisci almeno un ingrediente!")
     elif not API_KEY:
-        st.error("Chiave API non configurata nelle impostazioni del server.")
+        st.error("Chiave API non configurata nelle impostazioni del server Render.")
     else:
-        client = Mistral(api_key=API_KEY)
-
         with st.spinner("🔍 Ricerca delle ricette migliori nel database..."):
             try:
+                # Chiamata HTTP diretta all'API di Mistral
+                url = "https://api.mistral.ai/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json"
+                }
+
                 system_prompt = """
                 Sei un database culinario anti-spreco.
                 Restituisci ESCLUSIVAMENTE un oggetto JSON valido in italiano con la seguente struttura:
@@ -45,16 +49,21 @@ if st.button("Cerca Ricette"):
                 Non aggiungere alcun testo prima o dopo l'oggetto JSON.
                 """
 
-                response = client.chat.complete(
-                    model="mistral-small-latest",
-                    messages=[
+                payload = {
+                    "model": "mistral-small-latest",
+                    "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Crea 2 ricette usando principalmente questi ingredienti: {ingredienti_input}"}
                     ],
-                    response_format={"type": "json_object"}
-                )
+                    "response_format": {"type": "json_object"}
+                }
 
-                data = json.loads(response.choices[0].message.content)
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                response.raise_for_status()
+
+                res_json = response.json()
+                content = res_json["choices"][0]["message"]["content"]
+                data = json.loads(content)
 
                 for ricetta in data.get("ricette", []):
                     st.divider()
