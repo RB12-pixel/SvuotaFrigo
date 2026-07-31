@@ -7,7 +7,7 @@ from mistralai import Mistral
 st.set_page_config(page_title="Svuota Frigo Smart", page_icon="🥗")
 
 # Legge la chiave API dalle variabili d'ambiente di Render
-API_KEY = os.environ.get("MISTRAL_API_KEY")
+API_KEY = os.environ.get("yTvmRtdl6rPPRHfFD412ECb7Vaf04C8a")
 
 # Interfaccia Utente (Nessun riferimento all'IA)
 st.title("🥗 Svuota Frigo Smart")
