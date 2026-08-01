@@ -53,7 +53,7 @@ if st.button("Cerca Ricette"):
                     "model": "mistral-small-latest",
                     "messages": [
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": f"Crea 2 ricette usando principalmente questi ingredienti: {ingredienti_input}"}
+                        {"role": "user", "content": f"Crea 5 ricette usando principalmente questi ingredienti: {ingredienti_input}"}
                     ],
                     "response_format": {"type": "json_object"}
                 }
